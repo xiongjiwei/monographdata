@@ -9,19 +9,13 @@ const (
 )
 
 var (
-	Data       = [N]int{}
-	ShadowData = [N]int{}
-	lm         *lockManager
+	s  = [N]int{}
+	lm *lockManager
 )
 
 const (
 	w int32 = 2 << 20
 )
-
-type Pair struct {
-	I int
-	J int
-}
 
 type lockManager struct {
 	locks [N]int32
@@ -84,17 +78,15 @@ func (l *lockManager) unlock(i, j int) {
 	}
 }
 
-func Update(i, j int, ch chan<- Pair) {
+func Update(i, j int) {
 	lm.lock(i, j)
-	Data[j] = Data[i] + Data[(i+1)%N] + Data[(i+2)%N]
-	ch <- Pair{I: i, J: j}
+	s[j] = s[i] + s[(i+1)%N] + s[(i+2)%N]
 	lm.unlock(i, j)
 }
 
-func Reset() {
+func init() {
 	lm = newLockManager()
-	for i := range Data {
-		Data[i] = i
-		ShadowData[i] = i
+	for i := range s {
+		s[i] = i
 	}
 }
